@@ -7,6 +7,36 @@
   <title>Unity Web Player | X_Test</title>
   <link rel="shortcut icon" href="TemplateData/favicon.ico">
   <link rel="stylesheet" href="TemplateData/style.css">
+  <style>
+    /* Force Reown/Web3Modal to align correctly over the Unity Canvas */
+    w3m-modal {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100% !important;
+      height: 100% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      z-index: 2147483647 !important;
+      /* Max z-index */
+      pointer-events: none;
+      /* Let clicks pass through the overlay background if needed, but the modal itself catches them */
+    }
+
+    /* Ensure the internal modal captures events */
+    w3m-modal::part(modal) {
+      pointer-events: auto;
+    }
+
+    /* Scale fix for smaller embedded frames */
+    @media (max-width: 500px) {
+      w3m-modal {
+        transform: scale(0.85);
+        /* Slight shrink to fit comfortablt */
+      }
+    }
+  </style>
 
   <!-- Twitter Player Card Metadata -->
   <meta name="twitter:card" content="player">
@@ -15,8 +45,8 @@
   <meta name="twitter:description" content="Play X_Test on X!">
 
   <meta name="twitter:player" content="https://x-testing.vercel.app/index.html">
-  <meta name="twitter:player:width" content="1024">
-  <meta name="twitter:player:height" content="1024">
+  <meta name="twitter:player:width" content="500">
+  <meta name="twitter:player:height" content="900">
   <meta name="twitter:image" content="https://x-testing.vercel.app/TemplateData/cover.png">
 </head>
 
@@ -111,8 +141,8 @@
 
     } else {
       // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
-      canvas.style.width = "500px";
-      canvas.style.height = "900px";
+      canvas.style.width = "100%";
+      canvas.style.height = "100%";
     }
 
     document.querySelector("#unity-loading-bar").style.display = "block";

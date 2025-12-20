@@ -7,44 +7,6 @@
   <title>Unity Web Player | X_Test</title>
   <link rel="shortcut icon" href="TemplateData/favicon.ico">
   <link rel="stylesheet" href="TemplateData/style.css">
-  <style>
-    /* Force Reown/Web3Modal to align correctly over the Unity Canvas */
-    w3m-modal {
-      position: fixed !important;
-      top: 0 !important;
-      left: 0 !important;
-      width: 100% !important;
-      height: 100% !important;
-      display: flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      z-index: 2147483647 !important;
-      /* Max z-index */
-      pointer-events: none;
-      /* Let clicks pass through the overlay background if needed, but the modal itself catches them */
-    }
-
-    /* Ensure the internal modal captures events */
-    w3m-modal::part(modal) {
-      pointer-events: auto;
-    }
-
-    /* Scale fix for smaller embedded frames */
-    @media (max-width: 500px) {
-      w3m-modal {
-        transform: scale(0.8);
-        transform-origin: center center;
-      }
-    }
-
-    /* HIDDEN ELEMENTS: Footer, Fullscreen Button, Logo */
-    #unity-footer,
-    #unity-fullscreen-button,
-    #unity-logo-title-footer,
-    #unity-build-title {
-      display: none !important;
-    }
-  </style>
 
   <!-- Twitter Player Card Metadata -->
   <meta name="twitter:card" content="player">
@@ -52,15 +14,68 @@
   <meta name="twitter:title" content="X_Test">
   <meta name="twitter:description" content="Play X_Test on X!">
 
+  <!-- Updated to Landscape (16:9) to fit Twitter's player window better, while game remains portrait -->
   <meta name="twitter:player" content="https://x-testing.vercel.app/index.html">
-  <meta name="twitter:player:width" content="500">
-  <meta name="twitter:player:height" content="900">
+  <meta name="twitter:player:width" content="1280">
+  <meta name="twitter:player:height" content="720">
   <meta name="twitter:image" content="https://x-testing.vercel.app/TemplateData/cover.png">
+
+  <style>
+    /* Override/Add styles for the custom look */
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background-image: url('TemplateData/BG.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    #unity-container {
+      position: relative !important;
+      width: auto !important;
+      height: auto !important;
+      transform: none !important;
+      left: auto !important;
+      top: auto !important;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #unity-canvas {
+      /* Cool UI Panel Styling */
+      background: #000;
+      border-radius: 24px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      width: 100%;
+      height: 100%;
+    }
+
+    #unity-loading-bar {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 10;
+    }
+
+    #unity-footer {
+      display: none; /* Hiding footer for a cleaner card look, optional but requested 'cool UI' usually implies clean */
+    }
+  </style>
 </head>
 
 <body>
-  <div id="unity-container" class="unity-desktop">
-    <canvas id="unity-canvas" width=500 height=900 tabindex="-1"></canvas>
+  <div id="unity-container">
+    <canvas id="unity-canvas" tabindex="-1"></canvas>
     <div id="unity-loading-bar">
       <div id="unity-logo"></div>
       <div id="unity-progress-bar-empty">
@@ -68,21 +83,11 @@
       </div>
     </div>
     <div id="unity-warning"> </div>
-    <div id="unity-footer">
-      <div id="unity-logo-title-footer"></div>
-      <div id="unity-fullscreen-button"></div>
-      <div id="unity-build-title">X_Test</div>
-    </div>
   </div>
+
   <script>
     var canvas = document.querySelector("#unity-canvas");
 
-    // Shows a temporary message banner/ribbon for a few seconds, or
-    // a permanent error message on top of the canvas if type=='error'.
-    // If type=='warning', a yellow highlight color is used.
-    // Modify or remove this function to customize the visually presented
-    // way that non-critical warnings and error messages are presented to the
-    // user.
     function unityShowBanner(msg, type) {
       var warningBanner = document.querySelector("#unity-warning");
       function updateBannerVisibility() {
@@ -116,42 +121,45 @@
       showBanner: unityShowBanner,
     };
 
-    // By default, Unity keeps WebGL canvas render target size matched with
-    // the DOM size of the canvas element (scaled by window.devicePixelRatio)
-    // Set this to false if you want to decouple this synchronization from
-    // happening inside the engine, and you would instead like to size up
-    // the canvas DOM size and WebGL render target sizes yourself.
-    // config.matchWebGLToCanvasSize = false;
+    // Dynamic Resizing Function
+    function resizeGame() {
+      // Base Game Aspect Ratio (Portrait 500:900 = 5:9)
+      var gameAspectRatio = 500 / 900;
+      var windowWidth = window.innerWidth;
+      var windowHeight = window.innerHeight;
+      
+      // Calculate available space with some margin
+      var availableHeight = windowHeight * 0.95; 
+      var availableWidth = windowWidth * 0.95;
 
-    // If you would like all file writes inside Unity Application.persistentDataPath
-    // directory to automatically persist so that the contents are remembered when
-    // the user revisits the site the next time, uncomment the following line:
-    // config.autoSyncPersistentDataPath = true;
-    // This autosyncing is currently not the default behavior to avoid regressing
-    // existing user projects that might rely on the earlier manual
-    // JS_FileSystem_Sync() behavior, but in future Unity version, this will be
-    // expected to change.
+      var newWidth, newHeight;
 
+      // Try fitting by height first
+      newHeight = availableHeight;
+      newWidth = newHeight * gameAspectRatio;
+
+      // If width is too big, fit by width
+      if (newWidth > availableWidth) {
+        newWidth = availableWidth;
+        newHeight = newWidth / gameAspectRatio;
+      }
+
+      // Apply sizes
+      canvas.style.width = newWidth + "px";
+      canvas.style.height = newHeight + "px";
+    }
+
+    // Initialize resize
+    window.addEventListener('resize', resizeGame);
+    resizeGame(); // Initial call
+
+    // Mobile handling
     if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-      // Mobile device style: fill the whole browser client area with the game canvas:
-
       var meta = document.createElement('meta');
       meta.name = 'viewport';
       meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
       document.getElementsByTagName('head')[0].appendChild(meta);
-      document.querySelector("#unity-container").className = "unity-mobile";
-      canvas.className = "unity-mobile";
-
-      // To lower canvas resolution on mobile devices to gain some
-      // performance, uncomment the following line:
-      // config.devicePixelRatio = 1;
-
-
-    } else {
-      // Desktop style: Render the game canvas in a window that can be maximized to fullscreen:
-      canvas.style.width = "100%";
-      canvas.style.height = "100%";
-    }
+    } 
 
     document.querySelector("#unity-loading-bar").style.display = "block";
 
@@ -162,10 +170,8 @@
         document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
       }).then((unityInstance) => {
         document.querySelector("#unity-loading-bar").style.display = "none";
-        document.querySelector("#unity-fullscreen-button").onclick = () => {
-          unityInstance.SetFullscreen(1);
-        };
-
+        // removed fullscreen button logic since we are resizing dynamically and footer is hidden.
+        // If needed, we can add a custom overlay button, but for now cleanliness is priority.
       }).catch((message) => {
         alert(message);
       });

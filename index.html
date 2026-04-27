@@ -4,21 +4,29 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <title>Unity Web Player | X_Test</title>
+  <title>Stackmon | Play Now</title>
   <link rel="shortcut icon" href="TemplateData/favicon.ico">
   <link rel="stylesheet" href="TemplateData/style.css">
 
-  <!-- Twitter Player Card Metadata -->
+  <!-- Open Graph Meta Tags (Fallback for X/Twitter and other social platforms) -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://x-testing.vercel.app/">
+  <meta property="og:title" content="Stackmon">
+  <meta property="og:description" content="Play Stackmon">
+  <meta property="og:image" content="https://x-testing.vercel.app/assets/stackmon_twitter_card.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="628">
+  <meta property="og:image:type" content="image/png">
+
+  <!-- Twitter/X Card Metadata (Player Card Structure) -->
   <meta name="twitter:card" content="player">
   <meta name="twitter:site" content="@playstackmon">
-  <meta name="twitter:title" content="X_Test">
-  <meta name="twitter:description" content="Play X_Test on X!">
-
-  <!-- Updated to Landscape (16:9) to fit Twitter's player window better, while game remains portrait -->
-  <meta name="twitter:player" content="https://x-testing.vercel.app/index.html">
+  <meta name="twitter:title" content="Stackmon">
+  <meta name="twitter:description" content="Play Stackmon">
+  <meta name="twitter:player" content="https://x-testing.vercel.app/">
   <meta name="twitter:player:width" content="1280">
   <meta name="twitter:player:height" content="1280">
-  <meta name="twitter:image" content="https://x-testing.vercel.app/TemplateData/cover.png">
+  <meta name="twitter:image" content="https://x-testing.vercel.app/assets/stackmon_twitter_card.png">
 
   <style>
     /* Override/Add styles for the custom look */
@@ -68,7 +76,7 @@
     }
 
     #unity-footer {
-      display: none; /* Hiding footer for a cleaner card look, optional but requested 'cool UI' usually implies clean */
+      display: none;
     }
   </style>
 </head>
@@ -77,7 +85,7 @@
   <div id="unity-container">
     <canvas id="unity-canvas" tabindex="-1"></canvas>
     <div id="unity-loading-bar">
-      <div id="unity-logo"></div>
+      <div id="unity-logo" style="width: 154px; height: 154px; background-size: contain;"></div>
       <div id="unity-progress-bar-empty">
         <div id="unity-progress-bar-full"></div>
       </div>
@@ -127,9 +135,9 @@
       var gameAspectRatio = 500 / 900;
       var windowWidth = window.innerWidth;
       var windowHeight = window.innerHeight;
-      
+
       // Calculate available space with some margin
-      var availableHeight = windowHeight * 0.95; 
+      var availableHeight = windowHeight * 0.95;
       var availableWidth = windowWidth * 0.95;
 
       var newWidth, newHeight;
@@ -159,7 +167,7 @@
       meta.name = 'viewport';
       meta.content = 'width=device-width, height=device-height, initial-scale=1.0, user-scalable=no, shrink-to-fit=yes';
       document.getElementsByTagName('head')[0].appendChild(meta);
-    } 
+    }
 
     document.querySelector("#unity-loading-bar").style.display = "block";
 
@@ -170,8 +178,6 @@
         document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
       }).then((unityInstance) => {
         document.querySelector("#unity-loading-bar").style.display = "none";
-        // removed fullscreen button logic since we are resizing dynamically and footer is hidden.
-        // If needed, we can add a custom overlay button, but for now cleanliness is priority.
       }).catch((message) => {
         alert(message);
       });
